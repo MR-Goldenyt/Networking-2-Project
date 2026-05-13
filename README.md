@@ -59,6 +59,7 @@ ip ssh version 2
 
 ip access-list standard SSH_IT_ONLY
 permit 192.168.40.0 0.0.0.255
+permit 192.168.140.0 0.0.0.255
 exit
 
 ! Console Line
@@ -115,6 +116,22 @@ vlan 90
 name SERVERS
 vlan 99
 name MGT
+vlan 110
+name MANAGEMENT_WIRELESS
+vlan 120
+name ADMINISTRATION_WIRELESS
+vlan 130
+name FINANCE_WIRELESS
+vlan 140
+name IT_WIRELESS
+vlan 150
+name HUMAN_RESOURCES_WIRELESS
+vlan 160
+name INVESTMENT_WIRELESS
+vlan 170
+name AUDIT_WIRELESS
+vlan 180
+name CUSTOMER_SUPPORT_WIRELESS
 exit
 
 do wr
@@ -197,6 +214,66 @@ standby 99 priority 110
 standby 99 preempt
 exit
 
+interface Vlan 110
+ip address 192.168.110.252 255.255.255.0
+ip helper-address 192.168.0.1
+standby 110 ip 192.168.110.254
+standby 110 priority 110
+standby 110 preempt
+exit
+
+interface Vlan 120
+ip address 192.168.120.252 255.255.255.0
+ip helper-address 192.168.0.1
+standby 120 ip 192.168.120.254
+standby 120 priority 110
+standby 120 preempt
+exit
+
+interface Vlan 130
+ip address 192.168.130.252 255.255.255.0
+ip helper-address 192.168.0.1
+standby 130 ip 192.168.130.254
+standby 130 priority 110
+standby 130 preempt
+exit
+
+interface Vlan 140
+ip address 192.168.140.252 255.255.255.0
+ip helper-address 192.168.0.1
+standby 140 ip 192.168.140.254
+standby 140 priority 110
+standby 140 preempt
+exit
+
+interface Vlan 150
+ip address 192.168.150.252 255.255.255.0
+ip helper-address 192.168.0.1
+standby 150 ip 192.168.150.254
+standby 150 preempt
+exit
+
+interface Vlan 160
+ip address 192.168.160.252 255.255.255.0
+ip helper-address 192.168.0.1
+standby 160 ip 192.168.160.254
+standby 160 preempt
+exit
+
+interface Vlan 170
+ip address 192.168.170.252 255.255.255.0
+ip helper-address 192.168.0.1
+standby 170 ip 192.168.170.254
+standby 170 preempt
+exit
+
+interface Vlan 180
+ip address 192.168.180.252 255.255.255.0
+ip helper-address 192.168.0.1
+standby 180 ip 192.168.180.254
+standby 180 preempt
+exit
+
 do wr
 ```
 and Paste this in DSW2
@@ -275,6 +352,66 @@ standby 99 ip 192.168.99.254
 standby 99 preempt
 exit
 
+interface Vlan 110
+ip address 192.168.110.253 255.255.255.0
+ip helper-address 192.168.0.5
+standby 110 ip 192.168.110.254
+standby 110 preempt
+exit
+
+interface Vlan 120
+ip address 192.168.120.253 255.255.255.0
+ip helper-address 192.168.0.5
+standby 120 ip 192.168.120.254
+standby 120 preempt
+exit
+
+interface Vlan 130
+ip address 192.168.130.253 255.255.255.0
+ip helper-address 192.168.0.5
+standby 130 ip 192.168.130.254
+standby 130 preempt
+exit
+
+interface Vlan 140
+ip address 192.168.140.253 255.255.255.0
+ip helper-address 192.168.0.5
+standby 140 ip 192.168.140.254
+standby 140 preempt
+exit
+
+interface Vlan 150
+ip address 192.168.150.253 255.255.255.0
+ip helper-address 192.168.0.5
+standby 150 ip 192.168.150.254
+standby 150 priority 110
+standby 150 preempt
+exit
+
+interface Vlan 160
+ip address 192.168.160.253 255.255.255.0
+ip helper-address 192.168.0.5
+standby 160 ip 192.168.160.254
+standby 160 priority 110
+standby 160 preempt
+exit
+
+interface Vlan 170
+ip address 192.168.170.253 255.255.255.0
+ip helper-address 192.168.0.5
+standby 170 ip 192.168.170.254
+standby 170 priority 110
+standby 170 preempt
+exit
+
+interface Vlan 180
+ip address 192.168.180.253 255.255.255.0
+ip helper-address 192.168.0.5
+standby 180 ip 192.168.180.254
+standby 180 priority 110
+standby 180 preempt
+exit
+
 do wr
 ```
 
@@ -313,6 +450,30 @@ ip dhcp excluded-address 192.168.90.252 192.168.90.254
 
 ip dhcp excluded-address 192.168.99.1 192.168.99.10
 ip dhcp excluded-address 192.168.99.252 192.168.99.254
+
+ip dhcp excluded-address 192.168.110.1 192.168.110.10
+ip dhcp excluded-address 192.168.110.252 192.168.110.254
+
+ip dhcp excluded-address 192.168.120.1 192.168.120.10
+ip dhcp excluded-address 192.168.120.252 192.168.120.254
+
+ip dhcp excluded-address 192.168.130.1 192.168.130.10
+ip dhcp excluded-address 192.168.130.252 192.168.130.254
+
+ip dhcp excluded-address 192.168.140.1 192.168.140.10
+ip dhcp excluded-address 192.168.140.252 192.168.140.254
+
+ip dhcp excluded-address 192.168.150.1 192.168.150.10
+ip dhcp excluded-address 192.168.150.252 192.168.150.254
+
+ip dhcp excluded-address 192.168.160.1 192.168.160.10
+ip dhcp excluded-address 192.168.160.252 192.168.160.254
+
+ip dhcp excluded-address 192.168.170.1 192.168.170.10
+ip dhcp excluded-address 192.168.170.252 192.168.170.254
+
+ip dhcp excluded-address 192.168.180.1 192.168.180.10
+ip dhcp excluded-address 192.168.180.252 192.168.180.254
 
 ip dhcp pool VLAN10_POOL
 network 192.168.10.0 255.255.255.0
@@ -366,6 +527,55 @@ ip dhcp pool VLAN90_POOL
 network 192.168.90.0 255.255.255.0
 default-router 192.168.90.254
 dns-server 8.8.8.8
+exit
+
+ip dhcp pool VLAN110_POOL
+network 192.168.110.0 255.255.255.0
+default-router 192.168.110.254
+dns-server 8.8.8.8
+exit
+
+ip dhcp pool VLAN120_POOL
+network 192.168.120.0 255.255.255.0
+default-router 192.168.120.254
+dns-server 8.8.8.8
+exit
+
+ip dhcp pool VLAN130_POOL
+network 192.168.130.0 255.255.255.0
+default-router 192.168.130.254
+dns-server 8.8.8.8
+exit
+
+ip dhcp pool VLAN140_POOL
+network 192.168.140.0 255.255.255.0
+default-router 192.168.140.254
+dns-server 8.8.8.8
+exit
+
+ip dhcp pool VLAN150_POOL
+network 192.168.150.0 255.255.255.0
+default-router 192.168.150.254
+dns-server 8.8.8.8
+exit
+
+ip dhcp pool VLAN160_POOL
+network 192.168.160.0 255.255.255.0
+default-router 192.168.160.254
+dns-server 8.8.8.8
+exit
+
+ip dhcp pool VLAN170_POOL
+network 192.168.170.0 255.255.255.0
+default-router 192.168.170.254
+dns-server 8.8.8.8
+exit
+
+ip dhcp pool VLAN180_POOL
+network 192.168.180.0 255.255.255.0
+default-router 192.168.180.254
+dns-server 8.8.8.8
+exit
 
 interface GigabitEthernet0/1
 ip address 192.168.0.1 255.255.255.252
