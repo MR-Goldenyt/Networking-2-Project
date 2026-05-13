@@ -283,6 +283,7 @@ Paste this in Core router (Oman-Core)
 ```cisco
 en
 conf t
+
 ip dhcp excluded-address 192.168.10.1 192.168.10.10
 ip dhcp excluded-address 192.168.10.252 192.168.10.254
 
