@@ -88,12 +88,12 @@ Paste this in both Layer 3 switches (DSW1 & DSW2)
 enable
 configure terminal
 
+vtp mode server
+
 ! dont forget to change this per-site
 vtp domain GUFG_OMAN
 
 vtp password GUFGvtp2026
-
-! add vtp mode client if neccesary
 
 vlan 10
 name MANAGEMENT
@@ -539,6 +539,13 @@ conf t
 
 ip dhcp snooping
 ip dhcp snooping vlan 1,10,20,30,40,50,60,70,80,90,99
+
+vtp mode client
+
+! dont forget to change this per-site
+vtp domain GUFG_OMAN
+
+vtp password GUFGvtp2026
 
 interface range FastEthernet0/1 - 20
 ip dhcp snooping trust
