@@ -587,38 +587,18 @@ ip address 192.168.0.5 255.255.255.252
 no shut
 exit
 
-ip route 192.168.10.0 255.255.255.0 192.168.0.2 
-ip route 192.168.10.0 255.255.255.0 192.168.0.6 10
+router eigrp 20
+network 192.168.0.0 0.0.255.255
+no auto-summary
+passive-interface default
+no passive-interface g0/1
+no passive-interface g0/2
+exit
 
-ip route 192.168.20.0 255.255.255.0 192.168.0.2 
-ip route 192.168.20.0 255.255.255.0 192.168.0.6 10
+ip route 0.0.0.0 0.0.0.0 192.168.0.13
+ip route 0.0.0.0 0.0.0.0 192.168.0.9 10
 
-ip route 192.168.30.0 255.255.255.0 192.168.0.2 
-ip route 192.168.30.0 255.255.255.0 192.168.0.6 10
-
-ip route 192.168.40.0 255.255.255.0 192.168.0.2 
-ip route 192.168.40.0 255.255.255.0 192.168.0.6 10
-
-ip route 192.168.50.0 255.255.255.0 192.168.0.2 
-ip route 192.168.50.0 255.255.255.0 192.168.0.6 10
-
-ip route 192.168.60.0 255.255.255.0 192.168.0.2 
-ip route 192.168.60.0 255.255.255.0 192.168.0.6 10
-
-ip route 192.168.70.0 255.255.255.0 192.168.0.2 
-ip route 192.168.70.0 255.255.255.0 192.168.0.6 10
-
-ip route 192.168.80.0 255.255.255.0 192.168.0.2 
-ip route 192.168.80.0 255.255.255.0 192.168.0.6 10
-
-ip route 192.168.90.0 255.255.255.0 192.168.0.2 
-ip route 192.168.90.0 255.255.255.0 192.168.0.6 10
-
-ip route 192.168.99.0 255.255.255.0 192.168.0.2 
-ip route 192.168.99.0 255.255.255.0 192.168.0.6 10
-
-ip route 0.0.0.0 0.0.0.0 192.168.0.2 
-ip route 0.0.0.0 0.0.0.0 192.168.0.6 10
+do wr
 ```
 Paste this in both Distribution layer switches (DSW1 & DSW2)
 ```cisco
@@ -657,6 +637,16 @@ switchport trunk encapsulation dot1q
 switchport mode trunk
 switchport trunk native vlan 99
 no shut
+exit
+
+router eigrp 20
+network 192.168.0.0 0.0.255.255
+no auto-summary
+passive-interface default
+no passive-interface g0/1
+no passive-interface g0/2
+no passive-interface fa0/21
+no passive-interface fa0/22
 exit
 
 do wr
@@ -699,7 +689,7 @@ ip address 192.168.0.10 255.255.255.252
 no shut
 exit
 
-ip route 0.0.0.0 0.0.0.0 192.168.0.9
+
 
 do wr
 ```
@@ -739,7 +729,7 @@ ip address 192.168.0.6 255.255.255.252
 no shut
 exit
 
-ip route 0.0.0.0 0.0.0.0 192.168.0.13
+
 
 do wr
 ```
@@ -859,7 +849,7 @@ do wr
 
 ### Internet Connectivity 🔌
 
-Paste this in the Edge Router (Omantel)
+Paste this in the Edge Router (Oman-Edge)
 ```cisco
 en
 conf t
@@ -882,12 +872,18 @@ ip nat inside
 no shut
 exit
 
+router eigrp 20
+network 192.168.0.0 0.0.255.255
+no auto-summary
+passive-interface default
+no passive-interface g0/1
+no passive-interface g0/2
+exit
+
+! route to internet
 ip route 0.0.0.0 0.0.0.0 GigabitEthernet0/0 
-ip route 192.168.0.0 255.255.0.0 192.168.0.14 10
 
-! Oman Internal
-ip route 192.168.0.0 255.255.0.0 192.168.0.10 
-
+! Inter-site static routes to Hub (still unsure of these)
 ! Bahrain (10.0.0.0/16) - Send to Core
 ip route 10.0.0.0 255.255.0.0 192.168.0.10
 
