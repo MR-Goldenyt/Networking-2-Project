@@ -595,9 +595,6 @@ no passive-interface g0/1
 no passive-interface g0/2
 exit
 
-ip route 0.0.0.0 0.0.0.0 192.168.0.13
-ip route 0.0.0.0 0.0.0.0 192.168.0.9 10
-
 do wr
 ```
 Paste this in both Distribution layer switches (DSW1 & DSW2)
@@ -640,13 +637,11 @@ no shut
 exit
 
 router eigrp 20
+passive-interface default
+no passive-interface GigabitEthernet0/1
+no passive-interface GigabitEthernet0/2
 network 192.168.0.0 0.0.255.255
 no auto-summary
-passive-interface default
-no passive-interface g0/1
-no passive-interface g0/2
-no passive-interface fa0/21
-no passive-interface fa0/22
 exit
 
 do wr
@@ -689,8 +684,6 @@ ip address 192.168.0.10 255.255.255.252
 no shut
 exit
 
-
-
 do wr
 ```
 Paste this in DSW2
@@ -728,8 +721,6 @@ no switchport
 ip address 192.168.0.6 255.255.255.252
 no shut
 exit
-
-
 
 do wr
 ```
@@ -873,77 +864,99 @@ no shut
 exit
 
 router eigrp 20
-network 192.168.0.0 0.0.255.255
-no auto-summary
+redistribute static 
 passive-interface default
-no passive-interface g0/1
-no passive-interface g0/2
+no passive-interface GigabitEthernet0/1
+no passive-interface GigabitEthernet0/2
+network 192.168.0.0 0.0.255.255
 exit
 
-! route to internet
-ip route 0.0.0.0 0.0.0.0 GigabitEthernet0/0 
+ip nat pool GUFG_OMAN 209.165.200.235 209.165.200.238 netmask 255.255.255.248
 
-! Inter-site static routes to Hub (still unsure of these)
-! Bahrain (10.0.0.0/16) - Send to Core
-ip route 10.0.0.0 255.255.0.0 192.168.0.10
-
-! KSA (172.16.0.0/12) - Send to Core
-ip route 172.16.0.0 255.240.0.0 192.168.0.10
-
-! Qatar (172.20.0.0/16) - Send to Core
-ip route 172.20.0.0 255.255.0.0 192.168.0.10
+ip route 0.0.0.0 0.0.0.0 GigabitEthernet0/0
 
 ! Static Nat For Web server and Email Server
 ip nat inside source static 192.168.90.1 209.165.200.233
 ip nat inside source static 192.168.90.2 209.165.200.234
 
-ip access-list extended GUFG_NAT_LIST
-deny ip 192.168.0.0 0.0.255.255 192.168.0.0 0.0.255.255
-deny ip 192.168.0.0 0.0.255.255 10.0.0.0 0.0.255.255
-deny ip 192.168.0.0 0.0.255.255 172.16.0.0 0.15.255.255
-deny ip 192.168.0.0 0.0.255.255 172.20.0.0 0.0.255.255
-permit ip 192.168.0.0 0.0.255.255 any
-exit
-
-ip nat pool GUFG_OMAN 209.165.200.235 209.165.200.238 netmask 255.255.255.248
-
-ip nat inside source list GUFG_NAT_LIST interface GigabitEthernet0/0 overload
-
 ip access-list extended INTERNET_INBOUND
-deny icmp any host 192.168.90.1
-deny icmp any host 192.168.90.2
-permit tcp any host 192.168.90.1 eq www
-permit tcp any host 192.168.90.2 eq smtp
+
+! Block icmp packets to web and email servers
+deny icmp any host 209.165.200.233
+deny icmp any host 209.165.200.234
+
+! Only allow access to web and email traffic on servers
+permit tcp any host 209.165.200.233 eq www
+permit tcp any host 209.165.200.234 eq smtp
+permit tcp any 192.168.90.0 0.0.0.255 eq www
+permit tcp any 192.168.90.0 0.0.0.255 eq smtp
+
+! Block public internet traffic from reaching any internal GUFG site subnets
 deny ip any 192.168.0.0 0.0.255.255
+deny ip any 10.0.0.0 0.0.255.255
+deny ip any 172.16.0.0 0.15.255.255
+deny ip any 172.20.0.0 0.0.255.255
+
+! Global Fallback for established outbound internet connections
 permit ip any any
 exit
 
 interface GigabitEthernet0/0
 ip access-group INTERNET_INBOUND in
-exit
+
+do wr
 ```
 Paste this in DSW1 and DSW2
 ```cisco
 en
-conf t  
+conf t
 
-ip access-list extended DEPT_SECURITY_POLICY
-permit ip 192.168.0.0 0.0.255.255 10.0.0.0 0.0.255.255
-permit ip 192.168.0.0 0.0.255.255 172.16.0.0 0.15.255.255
-permit ip 192.168.0.0 0.0.255.255 172.20.0.0 0.0.255.255
-permit ip 192.168.0.0 0.0.255.255 192.168.0.0 0.0.255.255
+ip access-list extended FINANCE_SECURITY_POLICY
+
+! Allow Finance (VLAN 30) to talk to Finance at other sites
+permit ip 192.168.30.0 0.0.0.255 10.0.30.0 0.0.0.255
+permit ip 192.168.30.0 0.0.0.255 172.16.30.0 0.0.0.255
+permit ip 192.168.30.0 0.0.0.255 172.20.30.0 0.0.0.255
+
+! Allow access to all other parts of the internal network
+permit ip 192.168.30.0 0.0.0.255 192.168.0.0 0.0.255.255
+
+! Block communication to other departments at remote sites
+deny ip 192.168.30.0 0.0.0.255 10.0.0.0 0.0.255.255
+deny ip 192.168.30.0 0.0.0.255 172.16.0.0 0.15.255.255
+deny ip 192.168.30.0 0.0.0.255 172.20.0.0 0.0.255.255
+
+! Block Finance from reaching the Public Internet
+deny ip any any
+
+exit
+
+ip access-list extended HR_SECURITY_POLICY
+
+! Allow HR (VLAN 50) to talk to HR at other sites
 permit ip 192.168.50.0 0.0.0.255 10.0.50.0 0.0.0.255
-deny ip 192.168.30.0 0.0.0.255 any
-deny ip 192.168.50.0 0.0.0.255 any
-permit ip any any
+permit ip 192.168.50.0 0.0.0.255 172.16.50.0 0.0.0.255
+permit ip 192.168.50.0 0.0.0.255 172.20.50.0 0.0.0.255
+
+! Allow access to all other parts of the internal network
+permit ip 192.168.50.0 0.0.0.255 192.168.0.0 0.0.255.255
+
+! Block communication to other departments at remote sites
+deny ip 192.168.50.0 0.0.0.255 10.0.0.0 0.0.255.255
+deny ip 192.168.50.0 0.0.0.255 172.16.0.0 0.15.255.255
+deny ip 192.168.50.0 0.0.0.255 172.20.0.0 0.0.255.255
+
+! Block HR from reaching the Public Internet
+deny ip any any
+
 exit
 
 interface vlan 30
-ip access-group DEPT_SECURITY_POLICY in
+ip access-group FINANCE_SECURITY_POLICY in
 exit
 
 interface vlan 50
-ip access-group DEPT_SECURITY_POLICY in
+ip access-group HR_SECURITY_POLICY in
 exit
 
 do wr
